@@ -1,0 +1,13 @@
+create table users (uid BIGINT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(20) NOT NULL, last_name VARCHAR(20) NOT NULL, email VARCHAR(30) NOT NULL, password BINARY(32) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, account_balance DECIMAL(14,4), status INT, UNIQUE KEY(email)) ENGINE=INNODB;
+
+---------------------------------------------------------
+
+create table opened_positions (tid BIGINT AUTO_INCREMENT PRIMARY KEY, uid BIGINT, currency_pair CHAR(6), amount DECIMAL (14,4), opening_price DECIMAL (12,5), opening_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, long_position BOOLEAN, FOREIGN KEY(uid) REFERENCES users(uid)) ENGINE=INNODB;
+
+---------------------------------------------------------
+
+create table closed_positions (tid BIGINT PRIMARY KEY, uid BIGINT, currency_pair CHAR(6), amount DECIMAL (14,4), opening_price DECIMAL (12,5), closing_price DECIMAL (12,5), opening_timestamp TIMESTAMP, closing_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, profit DECIMAL(14,4), long_position BOOLEAN, FOREIGN KEY(uid) REFERENCES users(uid)) ENGINE=INNODB;
+
+---------------------------------------------------------
+
+create table pending_orders (oid BIGINT AUTO_INCREMENT PRIMARY KEY, uid BIGINT, tid BIGINT, currency_pair CHAR(6), amount DECIMAL (14,4), order_price DECIMAL (12,5), order_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, long_position BOOLEAN, triggered_above BOOLEAN, FOREIGN KEY(uid) REFERENCES users(uid)) ENGINE=INNODB;
