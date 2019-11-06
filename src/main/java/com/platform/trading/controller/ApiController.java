@@ -37,32 +37,13 @@ public class ApiController {
 	private OpenedPositionRepository openedPositionsDao;
 	
 	@Autowired
-	private ClosedPositionRepository closedPositionsDao;
-	
-	@Autowired
-	private UserRepository usersDao;
+	private MvcController mvcController;
 	
 	@Autowired
 	private TransactionResolver resolver;
 	
 	@Autowired
 	private GetXchgRates rates;
-	
-	private User initUser(String userEmail)
-	{
-		User user;
-		
-		try
-		{
-			user = usersDao.findByEmail(userEmail);
-		}
-		catch(Exception e)
-		{
-			return null;
-		}
-		
-		return user;
-	}
 	
 	@GetMapping("/rates")
 	public ArrayList<XchgRate> getRates()
@@ -79,32 +60,16 @@ public class ApiController {
 	@GetMapping("/opened_positions")
 	public List<OpenedPosition> openedPositions(Authentication auth)
 	{
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		List<OpenedPosition> openedList = openedPositionsDao.findByUid(user.getUid());
 		if(openedList != null)
 		{
 			for(OpenedPosition opened : openedList)
 			{
-				XchgRate rate = rates.getPairRate(opened.getCurrencyPair());
-				
-				BigDecimal openingPrice = opened.getOpeningPrice();
-				BigDecimal amount = opened.getAmount();
-				
-				if(opened.isLongPosition())
-				{
-					BigDecimal currentPrice = rate.getBid();
-					BigDecimal currentProfit = amount.multiply(currentPrice.divide(openingPrice, 5, RoundingMode.HALF_UP));
-					
-					opened.setCurrentProfit(currentProfit.subtract(amount));
-				}
-				else
-				{
-					BigDecimal currentPrice = rate.getAsk();
-					BigDecimal currentProfit = amount.multiply(openingPrice.divide(currentPrice, 5, RoundingMode.HALF_UP));
-							
-					opened.setCurrentProfit(currentProfit.subtract(amount));
-				}
+				BigDecimal profit = resolver.calculateProfit(opened, 
+						rates.getPairRateNotUpdated(opened.getCurrencyPair()));
+				opened.setCurrentProfit(profit);
 			}
 			return openedList;
 		}
@@ -114,7 +79,7 @@ public class ApiController {
 	@GetMapping("/pending_orders")
 	public List<PendingOrder> pendingOrders(Authentication auth)
 	{
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		return pendingOrdersDao.findByUid(user.getUid());
 	}
@@ -123,26 +88,10 @@ public class ApiController {
 	public String longPosition(@PathVariable("pair") String pair, 
 			@PathVariable("amount") BigDecimal amount, Authentication auth)
 	{
-		OpenedPosition position = new OpenedPosition();
+		User user = mvcController.initUser(auth.getName());
 		
-		User user = initUser(auth.getName());
-		
-		if(user.getAccountBalance().compareTo(amount) >= 0)
+		if(resolver.openPosition(user.getUid(), pair, amount, true))
 		{
-			position.setUid(user.getUid());
-			position.setCurrencyPair(pair);
-			position.setAmount(amount);
-			position.setOpeningPrice(rates.getPairRate(pair).getAsk());
-			position.setLongPosition(true);
-			
-			openedPositionsDao.save(position);
-			
-			// update user amount of money
-			BigDecimal accountBalance = user.getAccountBalance().subtract(amount);
-			user.setAccountBalance(accountBalance);
-			
-			usersDao.save(user);
-			
 			return "Success";
 		}
 		else return "Error: not enough money";
@@ -152,26 +101,10 @@ public class ApiController {
 	public String shortPosition(@PathVariable("pair") String pair, 
 			@PathVariable("amount") BigDecimal amount, Authentication auth)
 	{
-		OpenedPosition position = new OpenedPosition();
+		User user = mvcController.initUser(auth.getName());
 		
-		User user = initUser(auth.getName());
-		
-		if(user.getAccountBalance().compareTo(amount) >= 0)
+		if(resolver.openPosition(user.getUid(), pair, amount, false))
 		{
-			position.setUid(user.getUid());
-			position.setCurrencyPair(pair);
-			position.setAmount(amount);
-			position.setOpeningPrice(rates.getPairRate(pair).getBid());
-			position.setLongPosition(false);
-			
-			openedPositionsDao.save(position);
-			
-			// update user amount of money
-			BigDecimal accountBalance = user.getAccountBalance().subtract(amount);
-			user.setAccountBalance(accountBalance);
-			
-			usersDao.save(user);
-			
 			return "Success";
 		}
 		else return "Error: not enough money";
@@ -184,7 +117,7 @@ public class ApiController {
 	{
 		PendingOrder order = new PendingOrder();
 		
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		order.setUid(user.getUid());
 		order.setCurrencyPair(pair);
@@ -207,7 +140,7 @@ public class ApiController {
 	{
 		PendingOrder order = new PendingOrder();
 		
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		order.setUid(user.getUid());
 		order.setCurrencyPair(pair);
@@ -226,7 +159,7 @@ public class ApiController {
 	@PostMapping("/close/{tid}")
 	public String closePosition(@PathVariable("tid") Long tid, Authentication auth)
 	{
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		OpenedPosition opened = openedPositionsDao.findByTid(tid);
 		
@@ -251,7 +184,7 @@ public class ApiController {
 	{
 		PendingOrder order = new PendingOrder();
 		
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		OpenedPosition opened = openedPositionsDao.findByTid(tid);
 		if(opened != null)
@@ -280,7 +213,7 @@ public class ApiController {
 	@PostMapping("/cancel/{oid}")
 	public String cancelOrder(@PathVariable("oid") Long oid, Authentication auth)
 	{
-		User user = initUser(auth.getName());
+		User user = mvcController.initUser(auth.getName());
 		
 		PendingOrder pending = pendingOrdersDao.findByOid(oid);
 		

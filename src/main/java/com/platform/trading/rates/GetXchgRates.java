@@ -11,17 +11,20 @@ import org.springframework.stereotype.Component;
 
 import com.platform.trading.resolver.TransactionResolver;
 
+import javax.annotation.PostConstruct;
 import javax.json.*;
 
 import java.sql.Timestamp;
 
 @Component
-public class GetXchgRates implements Runnable {
+public class GetXchgRates {
 	
 	@Autowired
 	private TransactionResolver resolver;
 	
-	private ArrayList<XchgRate> xchgRates = null;
+	private ArrayList<XchgRate> rates = null;
+	
+	private long lastUpdate = -1;
 	
 	public HttpsURLConnection connect(String url)
 	{
@@ -292,20 +295,30 @@ public class GetXchgRates implements Runnable {
 		return null;
 	}
 	
-	public void run()
+	@PostConstruct
+	public synchronized void updateRatesIfNeeded()
 	{
-		this.xchgRates = updateRates();
-		resolver.resolve();
+		if(this.lastUpdate == -1)
+		{
+			this.rates = updateRates();
+			this.lastUpdate = new Date().getTime();
+		}
+		else if((new Date().getTime() - this.lastUpdate) > 40*1000)
+		{
+			this.rates = updateRates();
+			this.lastUpdate = new Date().getTime();
+		}
 	}
 
 	public ArrayList<XchgRate> getRates()
 	{
-		return xchgRates;
+		updateRatesIfNeeded();
+		return this.rates;
 	}
 	
-	public XchgRate getPairRate(String pair)
+	public XchgRate getPairRateNotUpdated(String pair)
 	{
-		for(XchgRate rate : xchgRates)
+		for(XchgRate rate : this.rates)
 		{
 			if(rate.getCurrencyPair().equals(pair))
 			{
@@ -313,5 +326,11 @@ public class GetXchgRates implements Runnable {
 			}
 		}
 		return null;
+	}
+	
+	public XchgRate getPairRate(String pair)
+	{
+		updateRatesIfNeeded();
+		return getPairRateNotUpdated(pair);
 	}
 }

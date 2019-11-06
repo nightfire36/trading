@@ -39,56 +39,84 @@ public class TransactionResolver {
 	@Autowired
 	private GetXchgRates rates;
 	
+	public BigDecimal calculateProfit(OpenedPosition opened, XchgRate rate)
+	{
+		BigDecimal openingPrice = opened.getOpeningPrice();
+		BigDecimal amount = opened.getAmount();
+		
+		if(opened.isLongPosition())
+		{
+			BigDecimal currentPrice = rate.getBid();
+			BigDecimal currentProfit = amount.multiply(currentPrice.divide(
+					openingPrice, 16, RoundingMode.HALF_UP)).setScale(5, RoundingMode.HALF_UP);
+			
+			return currentProfit.subtract(amount);
+		}
+		else
+		{
+			BigDecimal currentPrice = rate.getAsk();
+			BigDecimal currentProfit = amount.multiply(openingPrice.divide(
+					currentPrice, 16, RoundingMode.HALF_UP)).setScale(5, RoundingMode.HALF_UP);
+			
+			return currentProfit.subtract(amount);
+		}
+	}
+	
+	public boolean updateAccountBalance(Long uid, BigDecimal updateAmount)
+	{
+		User user = null;
+		try
+		{
+			user = usersDao.findByUid(uid);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		
+		BigDecimal accountBalance = user.getAccountBalance().add(updateAmount);
+		user.setAccountBalance(accountBalance);
+		usersDao.save(user);
+		
+		return true;
+	}
+	
 	public boolean closePosition(Long tid)
 	{
 		OpenedPosition opened = openedPositionsDao.findByTid(tid);
 		
 		if(opened != null)
 		{
-			BigDecimal amount = opened.getAmount();
-			BigDecimal openingPrice = opened.getOpeningPrice();
 			BigDecimal closingPrice;
-			BigDecimal transactionProfit;
+			
+			BigDecimal transactionProfit = calculateProfit(opened, 
+					rates.getPairRate(opened.getCurrencyPair()));
 			
 			if(opened.isLongPosition())
 			{
 				closingPrice = rates.getPairRate(opened.getCurrencyPair()).getBid();
-				transactionProfit = amount.multiply(closingPrice.divide(openingPrice, 5, RoundingMode.HALF_UP));
 			}
 			else
 			{
 				closingPrice = rates.getPairRate(opened.getCurrencyPair()).getAsk();
-				transactionProfit = amount.multiply(openingPrice.divide(closingPrice, 5, RoundingMode.HALF_UP));
 			}
 			
 			ClosedPosition closed = new ClosedPosition();
-			closed.setTid(opened.getTid());
+			closed.setTid(tid);
 			closed.setUid(opened.getUid());
 			closed.setCurrencyPair(opened.getCurrencyPair());
-			closed.setAmount(amount);
-			closed.setOpeningPrice(openingPrice);
+			closed.setAmount(opened.getAmount());
+			closed.setOpeningPrice(opened.getOpeningPrice());
 			closed.setClosingPrice(closingPrice);
 			closed.setOpeningTimestamp(opened.getOpeningTimestamp());
-			closed.setProfit(transactionProfit.subtract(amount));
+			closed.setProfit(transactionProfit);
 			closed.setLongPosition(opened.isLongPosition());
 			
 			closedPositionsDao.save(closed);
 			
-			// update user amount of money
-			User user = null;
-			try
-			{
-				user = usersDao.findByUid(opened.getUid());
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				return false;
-			}
-			
-			BigDecimal accountBalance = user.getAccountBalance().add(transactionProfit);
-			user.setAccountBalance(accountBalance);
-			usersDao.save(user);
+			// update user account balance
+			updateAccountBalance(opened.getUid(), opened.getAmount().add(transactionProfit));
 			
 			openedPositionsDao.deleteByTid(tid);
 			
@@ -97,21 +125,20 @@ public class TransactionResolver {
 		else return false;
 	}
 	
-	public boolean openPosition(PendingOrder order)
+	public boolean openPosition(Long uid, String currencyPair, BigDecimal amount, 
+			boolean longPosition)
 	{
 		OpenedPosition opened = new OpenedPosition();
-		String currencyPair = order.getCurrencyPair();
-		User user = usersDao.findByUid(order.getUid());
+		User user = usersDao.findByUid(uid);
 		
-		if(user.getAccountBalance().compareTo(order.getAmount()) >= 0)
+		if(user.getAccountBalance().compareTo(amount) >= 0)
 		{
-			opened.setUid(order.getUid());
+			opened.setUid(uid);
 			opened.setCurrencyPair(currencyPair);
-			opened.setAmount(order.getAmount());
-			opened.setLongPosition(order.isLongPosition());
-			openedPositionsDao.save(opened);
+			opened.setAmount(amount);
+			opened.setLongPosition(longPosition);
 			
-			if(order.isLongPosition())
+			if(longPosition)
 			{
 				opened.setOpeningPrice(rates.getPairRate(currencyPair).getAsk());
 			}
@@ -120,31 +147,11 @@ public class TransactionResolver {
 				opened.setOpeningPrice(rates.getPairRate(currencyPair).getBid());
 			}
 			
+			openedPositionsDao.save(opened);
+			
 			// update user amount of money
-			User userDao = null;
-			try
-			{
-				userDao = usersDao.findByUid(order.getUid());
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				return false;
-			}
+			updateAccountBalance(uid, amount.negate());
 			
-			BigDecimal accountBalance = userDao.getAccountBalance().subtract(order.getAmount());
-			userDao.setAccountBalance(accountBalance);
-			
-			try
-			{
-				usersDao.save(userDao);
-				pendingOrdersDao.deleteByOid(order.getOid());
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				return false;
-			}
 			return true;
 		}
 		else return false;
@@ -156,13 +163,28 @@ public class TransactionResolver {
 		{
 			if(order.getTid() != null)
 			{
-				pendingOrdersDao.deleteByOid(order.getOid());
-				closePosition(order.getTid());
+				try
+				{
+					pendingOrdersDao.deleteByOid(order.getOid());
+					closePosition(order.getTid());
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 			else if(order.getAmount() != null)
 			{
-				pendingOrdersDao.deleteByOid(order.getOid());
-				openPosition(order);
+				try
+				{
+					pendingOrdersDao.deleteByOid(order.getOid());
+					openPosition(order.getUid(), order.getCurrencyPair(), order.getAmount(),
+							order.isLongPosition());
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 			else
 			{

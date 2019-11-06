@@ -110,25 +110,29 @@ function buildPendingOrdersPanel(json)
 	return tableCode;
 }
 
+function pendingOrdersListener()
+{
+	console.log(this.status);
+	if(this.readyState == 4 && this.status == 200)
+	{
+		console.log("pending orders received successfully");
+		if(this.responseText[0] == '[')
+		{
+			var jsonOrders = JSON.parse(this.responseText);
+			document.getElementById("pending_orders").innerHTML = buildPendingOrdersPanel(jsonOrders);
+		}
+	}
+	else
+	{
+		console.log("pending orders receive failure");
+	}
+}
+
 function generatePendingOrdersPanel()
 {
 	var req = new XMLHttpRequest();
 	
+	req.addEventListener("load", pendingOrdersListener);
 	req.open("GET", "/api/pending_orders", true);
-	req.send(null);
-	
-	req.onreadystatechange = function()
-	{
-		console.log(this.status);
-		if(this.readyState == 4 && this.status == 200)
-		{
-			console.log("pending orders received successfully");
-			var jsonOrders = JSON.parse(req.responseText);
-			document.getElementById("pending_orders").innerHTML = buildPendingOrdersPanel(jsonOrders);
-		}
-		else
-		{
-			console.log("pending orders receive failure");
-		}
-	}
+	req.send();
 }

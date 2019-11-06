@@ -131,10 +131,9 @@ public class MvcController {
 		return "login";
 	}
 	
-	private User initUser(String userEmail)
+	public User initUser(String userEmail)
 	{
 		User user;
-		
 		try
 		{
 			user = usersDao.findByEmail(userEmail);
@@ -143,7 +142,6 @@ public class MvcController {
 		{
 			return null;
 		}
-		
 		return user;
 	}
 	

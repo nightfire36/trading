@@ -201,31 +201,36 @@ function buildOpenedPositionsPanel(json)
 	return tableCode;
 }
 
-function generateOpenedPositionsPanel()
+function openedPositionsListener()
 {
-	var req = new XMLHttpRequest();
-	
-	req.open("GET", "/api/opened_positions", true);
-	req.send(null);
-	
-	req.onreadystatechange = function()
+	console.log(this.status);
+	if(this.readyState == 4 && this.status == 200)
 	{
-		console.log(this.status);
-		if(this.readyState == 4 && this.status == 200)
+		console.log("opened positions received successfully");
+		if(this.responseText[0] == '[')
 		{
-			console.log("opened positions received successfully");
-			var jsonPositions = JSON.parse(req.responseText);
+			var jsonPositions = JSON.parse(this.responseText);
 			document.getElementById("opened_positions").innerHTML = buildOpenedPositionsPanel(jsonPositions);
 
 			if(openedOPForm != null)
 			{
 				openOpenedPositionsForm(openedOPForm);
 			}
+		}
+		
 
-		}
-		else
-		{
-			console.log("opened positions receive failure");
-		}
 	}
+	else
+	{
+		console.log("opened positions receive failure");
+	}
+}
+
+function generateOpenedPositionsPanel()
+{
+	var req = new XMLHttpRequest();
+	
+	req.addEventListener("load", openedPositionsListener);
+	req.open("GET", "/api/opened_positions", true);
+	req.send();
 }

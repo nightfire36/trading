@@ -227,31 +227,34 @@ function buildNewPositionsTable(json)
 	return tableCode;
 }
 
-function generateNewPositionsPanel()
+function newPositionsListener()
 {
-	var req = new XMLHttpRequest();
-	
-	req.open("GET", "/api/rates", true);
-	req.send(null);
-	
-	req.onreadystatechange = function()
+	console.log(this.status);
+	if(this.readyState == 4 && this.status == 200)
 	{
-		console.log(this.status);
-		if(this.readyState == 4 && this.status == 200)
+		console.log("rates received successfully");
+		if(this.responseText[0] == '[')
 		{
-			console.log("rates received successfully");
-			var jsonRates = JSON.parse(req.responseText);
+			var jsonRates = JSON.parse(this.responseText);
 			document.getElementById("new_positions").innerHTML = buildNewPositionsTable(jsonRates);
 
 			if(openedNPForm != null)
 			{
 				openNPForm(openedNPForm);
 			}
-
-		}
-		else
-		{
-			console.log("rates receive failure");
 		}
 	}
+	else
+	{
+		console.log("rates receive failure");
+	}
+}
+
+function generateNewPositionsPanel()
+{
+	var req = new XMLHttpRequest();
+	
+	req.addEventListener("load", newPositionsListener);
+	req.open("GET", "/api/rates", true);
+	req.send();
 }
