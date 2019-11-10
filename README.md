@@ -1,2 +1,3 @@
 # trading
-Trading platform
+
+The running application is available at address: TradingPlatform.pl
