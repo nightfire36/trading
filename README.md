@@ -3,7 +3,7 @@
 The running application is available at address: <a href="http://tradingplatform.pl/">TradingPlatform.pl</a>
 
 To develop application several technologies were used:
-1. Java with Spring & Hibernate - backend of application was created in Java (see <a href="src/main/java/com/platform/trading">Java</a>)
+1. Java with Spring & Hibernate - backend of the application was created in Java (see <a href="src/main/java/com/platform/trading">Java</a>)
 2. JavaServer Pages (JSP) - to dynamically add some content on server side (see <a href="src/main/webapp/WEB-INF/views">JSP</a>)
 3. JavaScript - trading panel is generated dynamically by JavaScript (see <a href="src/main/webapp/scripts">JS</a>)
 4. Bootstrap - to make application look fancy (see <a href="src/main/webapp/WEB-INF/views">Bootstrap</a>)
