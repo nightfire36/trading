@@ -68,7 +68,7 @@ public class ApiController {
 			for(OpenedPosition opened : openedList)
 			{
 				BigDecimal profit = resolver.calculateProfit(opened, 
-						rates.getPairRateNotUpdated(opened.getCurrencyPair()));
+						rates.getPairRate(opened.getCurrencyPair()));
 				opened.setCurrentProfit(profit);
 			}
 			return openedList;

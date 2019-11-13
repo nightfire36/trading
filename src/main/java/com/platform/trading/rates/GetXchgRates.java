@@ -17,14 +17,12 @@ import javax.json.*;
 import java.sql.Timestamp;
 
 @Component
-public class GetXchgRates {
+public class GetXchgRates implements Runnable {
 	
 	@Autowired
 	private TransactionResolver resolver;
 	
 	private ArrayList<XchgRate> rates = null;
-	
-	private long lastUpdate = -1;
 	
 	public HttpsURLConnection connect(String url)
 	{
@@ -272,7 +270,6 @@ public class GetXchgRates {
 				connection.setDoOutput(true);
 				
 				DataOutputStream os = new DataOutputStream(connection.getOutputStream());
-
 				// parameter of POST request appropriate for chosen exchange rates provider
 				os.writeBytes("");
 				os.flush();
@@ -295,30 +292,20 @@ public class GetXchgRates {
 		return null;
 	}
 	
-	@PostConstruct
-	public synchronized void updateRatesIfNeeded()
+	public void run()
 	{
-		if(this.lastUpdate == -1)
-		{
-			this.rates = updateRates();
-			this.lastUpdate = new Date().getTime();
-		}
-		else if((new Date().getTime() - this.lastUpdate) > 40*1000)
-		{
-			this.rates = updateRates();
-			this.lastUpdate = new Date().getTime();
-		}
+		this.rates = updateRates();
+		resolver.resolve();
 	}
 
 	public ArrayList<XchgRate> getRates()
 	{
-		updateRatesIfNeeded();
 		return this.rates;
 	}
 	
-	public XchgRate getPairRateNotUpdated(String pair)
+	public XchgRate getPairRate(String pair)
 	{
-		for(XchgRate rate : this.rates)
+		for(XchgRate rate : rates)
 		{
 			if(rate.getCurrencyPair().equals(pair))
 			{
@@ -326,11 +313,5 @@ public class GetXchgRates {
 			}
 		}
 		return null;
-	}
-	
-	public XchgRate getPairRate(String pair)
-	{
-		updateRatesIfNeeded();
-		return getPairRateNotUpdated(pair);
 	}
 }

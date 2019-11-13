@@ -11,8 +11,14 @@
 	<body>
 		<br />
 		<br />
-		<br />
-		<br />
+		<div class="card mx-auto" style="width: 36rem;">
+			<h5 class="card-title mx-auto">Welcome on the webpage</h5>
+			<div class="card-body">
+			This trading platform was designed for Forex learning purposes. If you don't have an account 
+			you need to <a href="register">create one for free</a>. It is necessary for maintaining continuity of your transactions 
+			history and account balance.
+			</div>
+		</div>
 		<br />
 		<div class="card mx-auto" style="width: 24rem;">
 			<h5 class="card-title mx-auto">Login</h5>

@@ -48,7 +48,7 @@
 								<div class="card border-primary">
 									<div class="card-header">Open new position</div>
 									<p class="card-text">
-										<p id = "new_positions"></p>
+										<p id = "new_positions">Loading content...</p>
 									</p>
 								</div>
 							</div>
@@ -57,7 +57,7 @@
 									<div class="card border-secondary">
 										<div class="card-header">Chart</div>
 										<p class="card-text">
-											<p id = "chart"></p>
+											<p id = "chart">Loading content...</p>
 										</p>
 									</div>
 								</div>
@@ -66,7 +66,7 @@
 									<div class="card border-secondary">
 										<div class="card-header">Opened positions</div>
 										<p class="card-text">
-											<p id = "opened_positions"></p>
+											<p id = "opened_positions">Loading content...</p>
 										</p>
 									</div>
 								</div>
@@ -75,7 +75,7 @@
 									<div class="card border-secondary">
 										<div class="card-header">Pending orders</div>
 										<p class="card-text">
-											<p id = "pending_orders"></p>
+											<p id = "pending_orders">Loading content...</p>
 										</p>
 									</div>
 								</div>
