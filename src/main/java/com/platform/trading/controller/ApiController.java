@@ -196,7 +196,7 @@ public class ApiController {
 				order.setCurrencyPair(opened.getCurrencyPair());
 				order.setAmount(null);
 				order.setOrderPrice(price);
-				order.setLongPosition(false);
+				order.setLongPosition(opened.isLongPosition());
 				order.setTriggeredAbove(trigger);
 				
 				pendingOrdersDao.save(order);
