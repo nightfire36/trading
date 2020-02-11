@@ -236,6 +236,7 @@ function newPositionsListener()
 		if(this.responseText[0] == '[')
 		{
 			var jsonRates = JSON.parse(this.responseText);
+			console.log(jsonRates);
 			document.getElementById("new_positions").innerHTML = buildNewPositionsTable(jsonRates);
 
 			if(openedNPForm != null)
