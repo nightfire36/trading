@@ -8,7 +8,6 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -45,35 +44,33 @@ public class MvcController {
     @Autowired
     private PendingOrderRepository pendingOrdersDao;
 
+    @Autowired
+    private SessionStore sessionStore;
+
+
+
     @GetMapping("/register")
     public String registerUserView() {
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("form") @Valid UserDto userDto,
-                               BindingResult result, Model model) {
-
+    public String registerUser(@ModelAttribute("form") @Valid UserDto userDto, BindingResult result, Model model) {
         if (!result.hasErrors()) {
-            User user = new UserPrototype().cloneFromUserDto(userDto);
-
+            User user = new UserPrototype(userDto).cloneFromUserDto();
             if (user != null) {
                 try {
                     usersDao.save(user);
                 } catch (DataIntegrityViolationException e) {
-                    e.printStackTrace();
-                    model.addAttribute("message", "<font color=\"red\">Registration failed! "
-                            + "Account with provided <br /> e-mail address already exists.</font>");
+                    model.addAttribute("message", 1);
                     return "register";
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    model.addAttribute("message", "<font color=\"red\">Registration failed!</font>");
+                    model.addAttribute("message", 2);
                     return "register";
                 }
-
                 return "redirect:login?registrationSuccessful";
             } else {
-                model.addAttribute("message", "<font color=\"red\">Registration failed!</font>");
+                model.addAttribute("message", 2);
                 return "register";
             }
         } else {
@@ -91,30 +88,18 @@ public class MvcController {
         Map<String, String[]> param = request.getParameterMap();
 
         if (param.containsKey("error")) {
-            model.addAttribute("message", "<font color=\"red\">Invalid username or password!</font>");
+            model.addAttribute("message", 1);
         } else if (param.containsKey("registrationSuccessful")) {
-            model.addAttribute("message", "<font color=\"green\">Registration successful.<br />"
-                    + " Now you can log in on your account.</font>");
+            model.addAttribute("message", 2);
         } else if (param.containsKey("logoutSuccessful")) {
-            model.addAttribute("message", "<font color=\"green\">Logout successful.</font>");
+            model.addAttribute("message", 3);
         }
-
         return "login";
     }
 
-    public User initUser(String userEmail) {
-        User user;
-        try {
-            user = usersDao.findByEmail(userEmail);
-        } catch (Exception e) {
-            return null;
-        }
-        return user;
-    }
-
     @GetMapping("/info")
-    public ModelAndView userInfoView(Authentication auth) {
-        User user = initUser(auth.getName());
+    public ModelAndView userInfoView() {
+        User user = sessionStore.getCurrentUser();
 
         ModelAndView model = new ModelAndView("userinfo");
         model.addObject("userinfo", user);
@@ -127,32 +112,38 @@ public class MvcController {
     }
 
     @GetMapping("/opened_positions")
-    public ModelAndView openedPositionsView(Authentication auth) {
+    public ModelAndView openedPositionsView() {
         ModelAndView model = new ModelAndView("opened_positions");
-        User user = initUser(auth.getName());
+        User user = sessionStore.getCurrentUser();
 
         List<OpenedPosition> opened = openedPositionsDao.findByUid(user.getUid());
-        if (opened != null) model.addObject("opened", opened);
+        if (opened != null) {
+            model.addObject("opened", opened);
+        }
         return model;
     }
 
     @GetMapping("/closed_positions")
-    public ModelAndView closedPositionsView(Authentication auth) {
+    public ModelAndView closedPositionsView() {
         ModelAndView model = new ModelAndView("closed_positions");
-        User user = initUser(auth.getName());
+        User user = sessionStore.getCurrentUser();
 
         List<ClosedPosition> closed = closedPositionsDao.findByUid(user.getUid());
-        if (closed != null) model.addObject("closed", closed);
+        if (closed != null) {
+            model.addObject("closed", closed);
+        }
         return model;
     }
 
     @GetMapping("/pending_orders")
-    public ModelAndView pendingOrdersView(Authentication auth) {
+    public ModelAndView pendingOrdersView() {
         ModelAndView model = new ModelAndView("pending_orders");
-        User user = initUser(auth.getName());
+        User user = sessionStore.getCurrentUser();
 
         List<PendingOrder> pending = pendingOrdersDao.findByUid(user.getUid());
-        if (pending != null) model.addObject("pending", pending);
+        if (pending != null) {
+            model.addObject("pending", pending);
+        }
         return model;
     }
 

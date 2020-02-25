@@ -11,10 +11,10 @@ public class Sha256Hash {
             hasher = MessageDigest.getInstance("SHA-256");
             hasher.update(s.getBytes("UTF-8"));
             hash = hasher.digest();
+            return hash;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return hash;
     }
 }

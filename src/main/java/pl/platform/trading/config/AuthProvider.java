@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import pl.platform.trading.controller.SessionStore;
 import pl.platform.trading.sql.user.User;
 import pl.platform.trading.sql.user.UserRepository;
 
@@ -19,6 +20,10 @@ public class AuthProvider implements AuthenticationProvider {
 
     @Autowired
     private UserRepository usersDao;
+
+    @Autowired
+    private SessionStore sessionStore;
+
 
     @Override
     public Authentication authenticate(Authentication auth) throws BadCredentialsException {
@@ -35,6 +40,9 @@ public class AuthProvider implements AuthenticationProvider {
             if (username.equals(user.getEmail()) && Arrays.equals(user.getPassword(), hash)) {
                 List<GrantedAuthority> grantedAuth = new ArrayList<>();
                 grantedAuth.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+                sessionStore.setCurrentUser(user);
+
                 return new UsernamePasswordAuthenticationToken(username, password, grantedAuth);
             } else {
                 throw new BadCredentialsException("Invalid username or password");

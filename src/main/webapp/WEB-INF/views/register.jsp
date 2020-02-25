@@ -16,6 +16,14 @@
 			<h5 class="card-title mx-auto">Create new account</h5>
 			<div class="card-body">
 				${message}
+				<c:choose>
+					<c:when test="${message == 1}">
+						<font color="red">Registration failed! Account with provided <br /> e-mail address already exists.</font>
+					</c:when>
+					<c:when test="${message == 2}">
+						<font color="red">Registration failed!</font>
+					</c:when>
+				</c:choose>
 				<form action = "register" method = "POST">
 					<div class="form-group">
 						<label for="first_name">First name</label>

@@ -35,59 +35,51 @@ public class OpenedPosition implements Serializable {
     @Transient
     private BigDecimal currentProfit;
 
-    public Long getUid() {
-        return uid;
+    public OpenedPosition() {
     }
 
-    public void setUid(Long uid) {
+    public OpenedPosition(Long uid, String currencyPair, BigDecimal amount,
+                          BigDecimal openingPrice, boolean longPosition) {
         this.uid = uid;
-    }
-
-    public String getCurrencyPair() {
-        return currencyPair;
-    }
-
-    public void setCurrencyPair(String currencyPair) {
         this.currencyPair = currencyPair;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public BigDecimal getOpeningPrice() {
-        return openingPrice;
-    }
-
-    public void setOpeningPrice(BigDecimal openingPrice) {
         this.openingPrice = openingPrice;
-    }
-
-    public boolean isLongPosition() {
-        return longPosition;
-    }
-
-    public void setLongPosition(boolean longPosition) {
         this.longPosition = longPosition;
+    }
+
+    public void setCurrentProfit(BigDecimal currentProfit) {
+        this.currentProfit = currentProfit;
     }
 
     public Long getTid() {
         return tid;
     }
 
+    public Long getUid() {
+        return uid;
+    }
+
+    public String getCurrencyPair() {
+        return currencyPair;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public BigDecimal getOpeningPrice() {
+        return openingPrice;
+    }
+
     public Timestamp getOpeningTimestamp() {
         return openingTimestamp;
     }
 
-    public BigDecimal getCurrentProfit() {
-        return currentProfit;
+    public boolean isLongPosition() {
+        return longPosition;
     }
 
-    public void setCurrentProfit(BigDecimal currentProfit) {
-        this.currentProfit = currentProfit;
+    public BigDecimal getCurrentProfit() {
+        return currentProfit;
     }
 }

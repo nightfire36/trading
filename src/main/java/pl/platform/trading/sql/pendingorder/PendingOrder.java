@@ -45,67 +45,53 @@ public class PendingOrder implements Serializable {
     @Column(name = "triggered_above")
     private boolean triggeredAbove;
 
-    public Long getUid() {
-        return uid;
+    public PendingOrder() {
     }
 
-    public void setUid(Long uid) {
+    public PendingOrder(Long uid, Long tid, String currencyPair, BigDecimal amount,
+                        BigDecimal orderPrice, boolean longPosition, boolean triggeredAbove) {
         this.uid = uid;
-    }
-
-    public Long getTid() {
-        return tid;
-    }
-
-    public void setTid(Long tid) {
         this.tid = tid;
-    }
-
-    public String getCurrencyPair() {
-        return currencyPair;
-    }
-
-    public void setCurrencyPair(String currencyPair) {
         this.currencyPair = currencyPair;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public BigDecimal getOrderPrice() {
-        return orderPrice;
-    }
-
-    public void setOrderPrice(BigDecimal orderPrice) {
         this.orderPrice = orderPrice;
-    }
-
-    public boolean isLongPosition() {
-        return longPosition;
-    }
-
-    public void setLongPosition(boolean longPosition) {
         this.longPosition = longPosition;
+        this.triggeredAbove = triggeredAbove;
     }
 
     public Long getOid() {
         return oid;
     }
 
+    public Long getUid() {
+        return uid;
+    }
+
+    public Long getTid() {
+        return tid;
+    }
+
+    public String getCurrencyPair() {
+        return currencyPair;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public BigDecimal getOrderPrice() {
+        return orderPrice;
+    }
+
     public Timestamp getOrderTimestamp() {
         return orderTimestamp;
     }
 
-    public boolean isTriggeredAbove() {
-        return triggeredAbove;
+    public boolean isLongPosition() {
+        return longPosition;
     }
 
-    public void setTriggeredAbove(boolean triggeredAbove) {
-        this.triggeredAbove = triggeredAbove;
+    public boolean isTriggeredAbove() {
+        return triggeredAbove;
     }
 }

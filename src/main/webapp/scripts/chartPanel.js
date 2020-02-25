@@ -1,29 +1,25 @@
 var currentPairName = null;
 
-function generateChart(pairId, timescale)
-{
-	var chartCode = "<div><iframe height=\"285\" width=\"630\" " +
-		"src=\"https://sslcharts.forexprostools.com/index.php?force_lang=15&pair_ID=" +
-		pairId +
-		"&timescale=" +
-		timescale + 
-		"&candles=100&style=line\"></iframe></div>";
+function generateChart(pairId, timescale) {
+	var chartCode = `
+		<div>
+			<iframe height="285" width="630" 
+				src="https://sslcharts.forexprostools.com/index.php?force_lang=15&pair_ID=${pairId}&
+				timescale=${timescale}&candles=100&style=line">
+			</iframe>
+		</div>`;
 
-	console.log(chartCode);
 	document.getElementById("chart").innerHTML = chartCode;
 }
 
-function generateChartForPair(pairName)
-{
+export function generateChartForPair(pairName) {
 	var pairId = null;
 
-	if(currentPairName == pairName)
-	{
+	if(currentPairName == pairName) {
 		return 0;
 	}
 
-	switch(pairName)
-	{
+	switch(pairName) {
 		case 'AUDCAD':
 			pairId = 47;
 			break;
@@ -97,8 +93,7 @@ function generateChartForPair(pairName)
 			break;
 	}
 
-	if(pairId != null)
-	{
+	if(pairId != null) {
 		generateChart(pairId, 3600);
 		currentPairName = pairName;
 	}
