@@ -40,79 +40,60 @@ public class ClosedPosition implements Serializable {
     @Column(name = "long_position")
     private boolean longPosition;
 
-    public Long getTid() {
-        return tid;
+    public ClosedPosition() {
     }
 
-    public void setTid(Long tid) {
+    public ClosedPosition(Long tid, Long uid, String currencyPair, BigDecimal amount,
+                          BigDecimal openingPrice, BigDecimal closingPrice, Timestamp openingTimestamp,
+                          BigDecimal profit, boolean longPosition) {
         this.tid = tid;
+        this.uid = uid;
+        this.currencyPair = currencyPair;
+        this.amount = amount;
+        this.openingPrice = openingPrice;
+        this.closingPrice = closingPrice;
+        this.openingTimestamp = openingTimestamp;
+        this.profit = profit;
+        this.longPosition = longPosition;
+    }
+
+    public Long getTid() {
+        return tid;
     }
 
     public Long getUid() {
         return uid;
     }
 
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
-
     public String getCurrencyPair() {
         return currencyPair;
-    }
-
-    public void setCurrencyPair(String currencyPair) {
-        this.currencyPair = currencyPair;
     }
 
     public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
     public BigDecimal getOpeningPrice() {
         return openingPrice;
-    }
-
-    public void setOpeningPrice(BigDecimal openingPrice) {
-        this.openingPrice = openingPrice;
     }
 
     public BigDecimal getClosingPrice() {
         return closingPrice;
     }
 
-    public void setClosingPrice(BigDecimal closingPrice) {
-        this.closingPrice = closingPrice;
-    }
-
     public Timestamp getOpeningTimestamp() {
         return openingTimestamp;
     }
 
-    public void setOpeningTimestamp(Timestamp openingTimestamp) {
-        this.openingTimestamp = openingTimestamp;
+    public Timestamp getClosingTimestamp() {
+        return closingTimestamp;
     }
 
     public BigDecimal getProfit() {
         return profit;
     }
 
-    public void setProfit(BigDecimal profit) {
-        this.profit = profit;
-    }
-
     public boolean isLongPosition() {
         return longPosition;
-    }
-
-    public void setLongPosition(boolean longPosition) {
-        this.longPosition = longPosition;
-    }
-
-    public Timestamp getClosingTimestamp() {
-        return closingTimestamp;
     }
 }

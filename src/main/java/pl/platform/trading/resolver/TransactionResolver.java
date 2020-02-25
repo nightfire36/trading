@@ -11,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.platform.trading.rates.ExchangeRate;
 import pl.platform.trading.rates.ExchnageRatesProvider;
 import pl.platform.trading.sql.closedposition.ClosedPosition;
+import pl.platform.trading.sql.closedposition.ClosedPositionBuilder;
 import pl.platform.trading.sql.closedposition.ClosedPositionRepository;
 import pl.platform.trading.sql.openedposition.OpenedPosition;
+import pl.platform.trading.sql.openedposition.OpenedPositionBuilder;
 import pl.platform.trading.sql.openedposition.OpenedPositionRepository;
 import pl.platform.trading.sql.pendingorder.PendingOrder;
 import pl.platform.trading.sql.pendingorder.PendingOrderRepository;
@@ -87,16 +89,17 @@ public class TransactionResolver {
                 closingPrice = rates.getPairRate(opened.getCurrencyPair()).getAsk();
             }
 
-            ClosedPosition closed = new ClosedPosition();
-            closed.setTid(tid);
-            closed.setUid(opened.getUid());
-            closed.setCurrencyPair(opened.getCurrencyPair());
-            closed.setAmount(opened.getAmount());
-            closed.setOpeningPrice(opened.getOpeningPrice());
-            closed.setClosingPrice(closingPrice);
-            closed.setOpeningTimestamp(opened.getOpeningTimestamp());
-            closed.setProfit(transactionProfit);
-            closed.setLongPosition(opened.isLongPosition());
+            ClosedPosition closed = new ClosedPositionBuilder()
+                    .setTid(tid)
+                    .setUid(opened.getUid())
+                    .setCurrencyPair(opened.getCurrencyPair())
+                    .setAmount(opened.getAmount())
+                    .setOpeningPrice(opened.getOpeningPrice())
+                    .setClosingPrice(closingPrice)
+                    .setOpeningTimestamp(opened.getOpeningTimestamp())
+                    .setProfit(transactionProfit)
+                    .setLongPosition(opened.isLongPosition())
+                    .build();
 
             closedPositionsDao.save(closed);
 
@@ -111,24 +114,23 @@ public class TransactionResolver {
         }
     }
 
-    public boolean openPosition(Long uid, String currencyPair, BigDecimal amount,
-                                boolean longPosition) {
-        OpenedPosition opened = new OpenedPosition();
+    public boolean openPosition(Long uid, String currencyPair, BigDecimal amount, boolean longPosition) {
         User user = usersDao.findByUid(uid);
 
         if (user.getAccountBalance().compareTo(amount) >= 0) {
-            opened.setUid(uid);
-            opened.setCurrencyPair(currencyPair);
-            opened.setAmount(amount);
-            opened.setLongPosition(longPosition);
+            OpenedPositionBuilder openedBuilder = new OpenedPositionBuilder()
+                    .setUid(uid)
+                    .setCurrencyPair(currencyPair)
+                    .setAmount(amount)
+                    .setLongPosition(longPosition);
 
             if (longPosition) {
-                opened.setOpeningPrice(rates.getPairRate(currencyPair).getAsk());
+                openedBuilder.setOpeningPrice(rates.getPairRate(currencyPair).getAsk());
             } else {
-                opened.setOpeningPrice(rates.getPairRate(currencyPair).getBid());
+                openedBuilder.setOpeningPrice(rates.getPairRate(currencyPair).getBid());
             }
 
-            openedPositionsDao.save(opened);
+            openedPositionsDao.save(openedBuilder.build());
 
             // update user amount of money
             updateAccountBalance(uid, amount.negate());

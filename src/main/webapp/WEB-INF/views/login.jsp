@@ -23,7 +23,17 @@
 		<div class="card mx-auto" style="width: 24rem;">
 			<h5 class="card-title mx-auto">Login</h5>
 			<div class="card-body">
-				${message}
+				<c:choose>
+					<c:when test="${message == 1}">
+						<font color="red">Invalid username or password!</font>
+					</c:when>
+					<c:when test="${message == 2}">
+						<font color="green">Registration successful.<br />Now you can log in to your account.</font>
+					</c:when>
+					<c:when test="${message == 3}">
+						<font color="green">Logout successful.</font>
+					</c:when>
+				</c:choose>
 				<form action = "login" method = "POST">
 					<div class="form-group">
 						<label for="exampleInputEmail1">Email address</label>

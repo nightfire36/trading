@@ -56,8 +56,7 @@ public class ExchnageRatesProvider implements Runnable {
 
         List<ExchangeRate> rates = null;
         try {
-            rates = objectMapper.readValue(jsonString, new TypeReference<List<ExchangeRate>>() {
-            });
+            rates = objectMapper.readValue(jsonString, new TypeReference<List<ExchangeRate>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,11 +104,9 @@ public class ExchnageRatesProvider implements Runnable {
     }
 
     public ExchangeRate getPairRate(String pair) {
-        for (ExchangeRate rate : rates) {
-            if (rate.getCurrencyPair().equals(pair)) {
-                return rate;
-            }
-        }
-        return null;
+        return this.rates.stream()
+                .filter(rate -> rate.getCurrencyPair().equals(pair))
+                .findFirst()
+                .orElse(null);
     }
 }

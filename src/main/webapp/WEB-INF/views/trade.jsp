@@ -86,9 +86,5 @@
 			</div>
 		</div>
 	</body>
-	<script src = "..\scripts\chartPanel.js"></script>
-	<script src = "..\scripts\newPositionsPanel.js"></script>
-	<script src = "..\scripts\openedPositionsPanel.js"></script>
-	<script src = "..\scripts\pendingOrdersPanel.js"></script>
-	<script src = "..\scripts\tradeOnload.js"></script>
+	<script src = "..\scripts\tradeOnload.js" type="module"></script>
 </html>
