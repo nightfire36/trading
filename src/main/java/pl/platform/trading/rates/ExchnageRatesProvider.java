@@ -11,13 +11,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import pl.platform.trading.resolver.TransactionResolver;
+import pl.platform.trading.resolver.TransactionResolverImpl;
 
 @Component
 public class ExchnageRatesProvider implements Runnable {
 
     @Autowired
-    private TransactionResolver resolver;
+    private TransactionResolverImpl resolver;
 
     private List<ExchangeRate> rates = null;
 
@@ -65,7 +65,7 @@ public class ExchnageRatesProvider implements Runnable {
     }
 
     private List<ExchangeRate> updateRates() {
-	// url to exchange rates provider
+	// url to exchange rates provider 
         String url = "";
 
         HttpsURLConnection connection = connect(url);
@@ -75,7 +75,7 @@ public class ExchnageRatesProvider implements Runnable {
 
                 connection.setRequestProperty("Content-Length", "0");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                connection.setRequestProperty("Accept-Language", "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7");
+                connection.setRequestProperty("Accept-Language", "pl-PL, pl;q=0.9, en;q=0.8");
 
                 connection.setDoOutput(true);
 
@@ -84,12 +84,12 @@ public class ExchnageRatesProvider implements Runnable {
                 os.flush();
                 os.close();
 
+                return jsonToExchangeRates(getHttpsContent(connection));
+
             } catch (IOException e) {
                 System.out.println("Setting properties error");
                 e.printStackTrace();
             }
-
-            return jsonToExchangeRates(getHttpsContent(connection));
         }
         return null;
     }

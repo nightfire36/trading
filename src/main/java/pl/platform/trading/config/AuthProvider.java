@@ -36,15 +36,20 @@ public class AuthProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Invalid username or password");
         }
         byte[] hash = new Sha256Hash().getSHA256Hash(password);
-        if (hash != null && user != null) {
-            if (username.equals(user.getEmail()) && Arrays.equals(user.getPassword(), hash)) {
-                List<GrantedAuthority> grantedAuth = new ArrayList<>();
-                grantedAuth.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if (hash != null) {
+            if(user != null) {
+                if (username.equals(user.getEmail()) && Arrays.equals(user.getPassword(), hash)) {
+                    List<GrantedAuthority> grantedAuth = new ArrayList<>();
+                    grantedAuth.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-                sessionStore.setCurrentUser(user);
+                    sessionStore.setCurrentUser(user);
 
-                return new UsernamePasswordAuthenticationToken(username, password, grantedAuth);
-            } else {
+                    return new UsernamePasswordAuthenticationToken(username, password, grantedAuth);
+                } else {
+                    throw new BadCredentialsException("Invalid username or password");
+                }
+            }
+            else {
                 throw new BadCredentialsException("Invalid username or password");
             }
         } else {

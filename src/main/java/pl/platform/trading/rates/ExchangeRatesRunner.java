@@ -1,40 +1,38 @@
 package pl.platform.trading.rates;
 
-import java.util.concurrent.*;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExchangeRatesRunner {
-
-    private ScheduledExecutorService thread = null;
+public class ExchangeRatesRunner implements Runnable {
 
     @Autowired
     private ExchnageRatesProvider rates;
 
+    private long lastTimestamp;
+
     @PostConstruct
     public void setup() {
-        thread = Executors.newScheduledThreadPool(1);
-        thread.scheduleAtFixedRate(rates, 0, 60, TimeUnit.SECONDS);
+        Thread thread = new Thread(this);
+        thread.start();
     }
 
-    public boolean isRunning() {
-        return !thread.isTerminated();
-    }
-
-    public void stop() {
-        thread.shutdown();
-
-        while (isRunning()) {
+    public void run() {
+        while(true) {
+            // dont get rates more frequent than every 40 s
+            // even if interrupted
+            if(this.lastTimestamp + 40 * 1000 < System.currentTimeMillis()) {
+                Thread ratesProviderThread = new Thread(this.rates);
+                ratesProviderThread.start();
+                this.lastTimestamp = System.currentTimeMillis();
+            }
             try {
-                Thread.sleep(200);
+                Thread.sleep(60 * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
-
 }

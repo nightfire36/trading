@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(allowSetters = true, value = {"Name", "Bid", "Ask", "Min", "Max", "Time", "ChartDirection"})
 public class ExchangeRate {
 	
 	@JsonProperty("Name")

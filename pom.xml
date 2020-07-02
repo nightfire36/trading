@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pl.platform</groupId>
 	<artifactId>trading</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.3.0</version>
 	<packaging>war</packaging>
 	<name>trading</name>
 	<description>Trading platform</description>

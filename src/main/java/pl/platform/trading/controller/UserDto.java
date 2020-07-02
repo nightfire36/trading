@@ -8,11 +8,11 @@ public class UserDto {
 
     @NotEmpty
     @Size(min = 3, max = 20)
-    private String first_name;
+    private String firstName;
 
     @NotEmpty
     @Size(min = 3, max = 20)
-    private String last_name;
+    private String lastName;
 
     @NotEmpty
     @Email
@@ -23,12 +23,22 @@ public class UserDto {
     @Size(min = 6, max = 30)
     private String password;
 
+    public UserDto() {
+    }
+
+    public UserDto(String first_name, String last_name, String email, String password) {
+        this.firstName = first_name;
+        this.lastName = last_name;
+        this.email = email;
+        this.password = password;
+    }
+
     public String getFirstName() {
-        return first_name;
+        return firstName;
     }
 
     public String getLastName() {
-        return last_name;
+        return lastName;
     }
 
     public String getEmail() {
@@ -38,5 +48,4 @@ public class UserDto {
     public String getPassword() {
         return password;
     }
-
 }

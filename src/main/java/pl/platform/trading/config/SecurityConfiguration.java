@@ -2,13 +2,16 @@ package pl.platform.trading.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
 @Configuration
+@Order(2)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -17,21 +20,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity security) throws Exception {
         security
+                .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/user/register", "/user/login")
-                .permitAll()
+                    .antMatchers("/user/register", "/user/login")
+                    .permitAll()
                 .and()
-                .authorizeRequests()
-                .antMatchers("/*", "/user/*", "/api/*")
-                .fullyAuthenticated()
+                    .authorizeRequests()
+                    .antMatchers("/**", "/user/**", "/api/**")
+                    .fullyAuthenticated()
                 .and()
-                .formLogin()
-                .loginPage("/user/login")
-                .defaultSuccessUrl("/user/description", true)
+                    .formLogin()
+                    .loginPage("/user/login")
+                    .defaultSuccessUrl("/user/description", true)
                 .and()
-                .logout()
-                .logoutUrl("/user/logout")
-                .logoutSuccessUrl("/user/login?logoutSuccessful");
+                    .logout()
+                    .logoutUrl("/user/logout")
+                    .logoutSuccessUrl("/user/login?logoutSuccessful");
     }
 
     @Override

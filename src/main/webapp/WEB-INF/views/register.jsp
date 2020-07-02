@@ -15,7 +15,6 @@
 		<div class="card mx-auto" style="width: 24rem;">
 			<h5 class="card-title mx-auto">Create new account</h5>
 			<div class="card-body">
-				${message}
 				<c:choose>
 					<c:when test="${message == 1}">
 						<font color="red">Registration failed! Account with provided <br /> e-mail address already exists.</font>

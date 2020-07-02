@@ -33,7 +33,7 @@ class TransactionResolverTest {
     ExchnageRatesProvider rates;
 
     @InjectMocks
-    TransactionResolver resolver;
+    TransactionResolverImpl resolver;
 
 
     @BeforeEach

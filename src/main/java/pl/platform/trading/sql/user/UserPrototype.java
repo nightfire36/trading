@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public class UserPrototype {
 
-    UserDto userDto;
+    private UserDto userDto;
 
     public UserPrototype(UserDto userDto) {
         this.userDto = userDto;
